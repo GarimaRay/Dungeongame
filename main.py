@@ -1,4 +1,3 @@
-# main.py
 from __future__ import annotations
 
 from controllers.game_controller import GameController

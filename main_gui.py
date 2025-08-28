@@ -1,4 +1,3 @@
-# main_gui.py
 from __future__ import annotations
 from controllers.gui_controller import GUIController
 from models.game_state import GameState

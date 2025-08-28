@@ -3,12 +3,12 @@ from typing import Tuple, Iterable, Optional
 from models.game_state import GameState
 import random
 
-# --- encounter tuning ---
-ENCOUNTER_PROB_ADJ = 0.35   # chance to get hit if a monster is adjacent after they move
+# Game rules
+ENCOUNTER_PROB_ADJ = 0.35   # chance to get hit if a monster ends up adjacent after they move 
 ENCOUNTER_PROB_ON  = 0.90   # chance to get hit if a monster ends up on your tile after they move
 DAMAGE_ADJ = 1
 DAMAGE_ON  = 2
-MAX_HP = 10
+MAX_HP = 1
 
 
 class GameController:

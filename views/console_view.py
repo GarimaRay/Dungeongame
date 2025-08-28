@@ -7,7 +7,7 @@ class ConsoleView:
 
     def render(self, state: GameState) -> None:
         self.clear()
-        print("=== Dungeon Game (MVC) ===\n")
+        print("=== Dungeon Game ===\n")
         coins_left = len(state.world.gold)
         gate_status = "OPEN" if coins_left == 0 else f"locked — {coins_left} left"
         print(f"HP: {state.player.hp}   Coins: {state.player.gold}   Gate: {gate_status}")

@@ -1,4 +1,3 @@
-# controllers/gui_controller.py
 from __future__ import annotations
 from typing import Tuple
 from models.game_state import GameState

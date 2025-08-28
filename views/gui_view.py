@@ -1,4 +1,3 @@
-# views/gui_view.py
 from __future__ import annotations
 import tkinter as tk
 from models.game_state import GameState
