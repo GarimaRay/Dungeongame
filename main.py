@@ -1,3 +1,6 @@
+# main.py
+from __future__ import annotations
+
 from controllers.game_controller import GameController
 from models.game_state import GameState
 from models.player import Player
@@ -6,9 +9,9 @@ from views.console_view import ConsoleView
 
 
 def main() -> None:
-    # Initialize world and player
-    world = World.default()
-    player = Player(pos=(1, 1))  # make sure (1,1) is floor in the map
+    # Initialize compact world and player
+    world = World.default_small()
+    player = Player(pos=(1, 1))  # (1,1) is guaranteed to be a floor in both defaults
     state = GameState(world=world, player=player)
 
     view = ConsoleView()
@@ -25,6 +28,8 @@ def main() -> None:
 
     # final screen
     view.render(state)
+    if state.did_win:
+        print("\nYou escaped the dungeon—nice work!")
     print("\nThanks for playing!")
 
 

@@ -1,24 +1,34 @@
+# views/console_view.py
+from __future__ import annotations
+
 import os
-from typing import Iterable
+
 from models.game_state import GameState
 
 
 class ConsoleView:
     def clear(self) -> None:
-        # Clear screen on Windows/Unix
         os.system("cls" if os.name == "nt" else "clear")
 
     def render(self, state: GameState) -> None:
         self.clear()
         print("=== Dungeon Game (MVC) ===\n")
-        print(f"HP: {state.player.hp}   Inventory: {self._fmt_list(state.player.inventory)}")
+        print(
+            f"HP: {state.player.hp}   "
+            f"Gold: {state.player.gold}   "
+            f"Inventory: {', '.join(state.player.inventory) or '(empty)'}"
+        )
         print()
 
-        # draw map with player overlay
         px, py = state.player.pos
-        for y, row in enumerate(state.world.rows):
-            line = "".join("P" if (x == px and y == py) else ch for x, ch in enumerate(row))
-            print(line)
+        for y in range(state.world.height):
+            line_chars = []
+            for x in range(state.world.width):
+                if (x, y) == (px, py):
+                    line_chars.append("P")
+                else:
+                    line_chars.append(state.world.tile_at(x, y))
+            print("".join(line_chars))
         print()
 
         if state.message:
@@ -30,12 +40,8 @@ class ConsoleView:
         return (
             "Commands:\n"
             "  n,s,e,w  - move\n"
-            "  look     - reprint the map and status\n"
-            "  inv      - show inventory\n"
-            "  help     - show this help\n"
-            "  quit     - exit the game"
+            "  look     - reprint map\n"
+            "  inv      - inventory\n"
+            "  help     - help\n"
+            "  quit     - exit"
         )
-
-    @staticmethod
-    def _fmt_list(items: Iterable[str]) -> str:
-        return ", ".join(items) if items else "(empty)"

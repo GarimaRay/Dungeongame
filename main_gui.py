@@ -16,24 +16,27 @@ def main() -> None:
     view = GuiView()
     controller = GUIController()
 
-    # --- key bindings ---
+    # --- key bindings set up AFTER Start is pressed ---
     def on_key(event) -> None:
-        # Normalize to something like "up", "down", "a", "w", etc.
         k = event.keysym.lower()
         controller.handle(k, state)
         view.render(state)
         if state.is_over:
-            # Close window shortly after showing final screen
-            view.root.after(600, view.root.destroy)
+            view.root.after(1200, view.root.destroy)
 
-    for keysym in ("Up", "Down", "Left", "Right", "w", "a", "s", "d"):
-        view.bind_key(f"<{keysym}>", on_key)
+    def start_game() -> None:
+        # Bind keys now that the player started
+        for keysym in ("Up", "Down", "Left", "Right", "w", "a", "s", "d"):
+            view.bind_key(f"<{keysym}>", on_key)
+        view.render(state)
+        view.root.focus_set()
 
     # Close button: mark game over so the loop can end gracefully
     view.set_on_close(lambda: setattr(state, "is_over", True))
 
-    # Initial draw
+    # Initial draw (map under the overlay), then show Start
     view.render(state)
+    view.show_start_screen(start_game)
 
     # Tk mainloop
     view.mainloop()
