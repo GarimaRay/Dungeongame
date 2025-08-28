@@ -17,6 +17,9 @@ class GUIController:
         self.core = GameController()  # share rules with console
 
     def handle(self, raw: str, state: GameState) -> None:
+        if state.is_over:
+            return  # ignore inputs after game ends
+
         k = raw.strip().lower()
         arrow = {"up","down","left","right"}
         if k in arrow or k in ("w","a","s","d","n","e"):

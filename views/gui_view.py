@@ -29,6 +29,7 @@ class GuiView:
         self.canvas.pack()
         self._on_close = None
         self._start_overlay = None
+        self._end_overlay = None
 
     # -------- integration helpers --------
     def bind_key(self, key: str, func) -> None:
@@ -48,7 +49,6 @@ class GuiView:
         self.root.mainloop()
 
     def show_start_screen(self, on_start) -> None:
-        """Simple overlay with a Start Game button."""
         if self._start_overlay:
             try: self._start_overlay.destroy()
             except Exception: pass
@@ -58,7 +58,7 @@ class GuiView:
         title.pack(padx=20, pady=(16, 8))
         subtitle = tk.Label(
             overlay,
-            text="Collect all coins ($) to open the exit gate (E).\nBeware: monsters (▣) roam…",
+            text="Collect all coins ($) to open the exit gate (E).\nBeware: monsters roam…",
             fg="white", bg=COLORS["panel"]
         )
         subtitle.pack(padx=20, pady=(0, 12))
@@ -66,6 +66,41 @@ class GuiView:
         btn.pack(padx=20, pady=(0, 16))
         self._start_overlay = overlay
         btn.focus_set()
+
+    def show_end_screen(self, did_win: bool, message: str, on_quit) -> None:
+        """Big end-of-game overlay showing win/lose and the last event message."""
+        if self._end_overlay:
+            try: self._end_overlay.destroy()
+            except Exception: pass
+
+        overlay = tk.Frame(self.root, bg=COLORS["panel"])
+        overlay.place(relx=0.5, rely=0.5, anchor="center")
+
+        msg = "YOU WON!" if did_win else "YOU LOST!"
+        color = COLORS["exit_open"] if did_win else COLORS["exit_locked"]
+
+        title = tk.Label(
+            overlay, text=msg, fg=color, bg=COLORS["panel"],
+            font=("TkDefaultFont", 24, "bold")
+        )
+        title.pack(padx=32, pady=(18, 8))
+
+        sub = tk.Label(
+            overlay,
+            text=(message or "Thanks for playing."),
+            fg="white", bg=COLORS["panel"], justify="center"
+        )
+        sub.pack(padx=32, pady=(0, 12))
+
+        btn = tk.Button(overlay, text="Quit", command=on_quit)
+        btn.pack(padx=32, pady=(0, 18))
+        btn.focus_set()
+
+        # Enter/Esc shortcuts
+        self.root.bind("<Return>", lambda _e: on_quit())
+        self.root.bind("<Escape>", lambda _e: on_quit())
+
+        self._end_overlay = overlay
 
     # -------- rendering --------
     def _resize_canvas(self, state: GameState) -> None:
@@ -81,13 +116,11 @@ class GuiView:
         coins_left = len(state.world.gold)
         gate_color = COLORS["exit_open"] if coins_left == 0 else COLORS["exit_locked"]
 
-        # tiles
         for y, row in enumerate(state.world.rows):
             for x, _ in enumerate(row):
                 x0, y0 = x * TILE, y * TILE
                 x1, y1 = x0 + TILE, y0 + TILE
 
-                # base tile
                 if state.world.is_wall(x, y):
                     c.create_rectangle(x0, y0, x1, y1,
                                        fill=COLORS["wall"], outline=COLORS["grid"])
@@ -95,28 +128,23 @@ class GuiView:
                     c.create_rectangle(x0, y0, x1, y1,
                                        fill=COLORS["floor"], outline=COLORS["grid"])
 
-                # exit gate (always visible)
                 if (x, y) == state.world.exit:
                     c.create_rectangle(x0 + 8, y0 + 8, x1 - 8, y1 - 8,
                                        fill=gate_color, outline="")
 
-                # coins
                 if (x, y) in state.world.gold:
                     c.create_oval(x0 + 14, y0 + 14, x1 - 14, y1 - 14,
                                   fill=COLORS["gold"], outline=COLORS["grid"])
 
-                # monsters (square)
                 if (x, y) in state.world.monsters:
                     c.create_rectangle(x0 + 14, y0 + 14, x1 - 14, y1 - 14,
                                        fill=COLORS["monster"], outline=COLORS["grid"])
 
-        # player
         px, py = state.player.pos
         c.create_oval(px * TILE + 6, py * TILE + 6,
                       px * TILE + TILE - 6, py * TILE + TILE - 6,
                       fill=COLORS["player"], outline="white", width=2)
 
-        # HUD
         hud_y = state.world.height * TILE + 16
         status = "Gate OPEN" if coins_left == 0 else f"Gate locked — {coins_left} coin(s) left"
         c.create_text(4, hud_y, anchor="w", fill=COLORS["text"],
